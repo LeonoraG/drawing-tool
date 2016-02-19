@@ -37,12 +37,12 @@
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.colorPickerButton = new System.Windows.Forms.ToolStripButton();
             this.currentColorButton = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton6 = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.openImageButton = new System.Windows.Forms.ToolStripButton();
             this.newEmptyImageButton = new System.Windows.Forms.ToolStripButton();
             this.saveButton = new System.Windows.Forms.ToolStripButton();
             this.saveAsButton = new System.Windows.Forms.ToolStripButton();
+            this.closeFileButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolSelectDropdownButton = new System.Windows.Forms.ToolStripDropDownButton();
             this.pencilToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -67,6 +67,7 @@
             this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripMenuItem();
+            this.collageButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.LeftToolStripPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
@@ -83,7 +84,7 @@
             // toolStripContainer1.ContentPanel
             // 
             this.toolStripContainer1.ContentPanel.Controls.Add(this.panel1);
-            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(657, 388);
+            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(649, 388);
             this.toolStripContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             // 
             // toolStripContainer1.LeftToolStripPanel
@@ -106,7 +107,7 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(657, 388);
+            this.panel1.Size = new System.Drawing.Size(649, 388);
             this.panel1.TabIndex = 0;
             // 
             // pictureBox1
@@ -126,11 +127,10 @@
             this.toolStrip2.Dock = System.Windows.Forms.DockStyle.None;
             this.toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.colorPickerButton,
-            this.currentColorButton,
-            this.toolStripButton6});
+            this.currentColorButton});
             this.toolStrip2.Location = new System.Drawing.Point(0, 3);
             this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(24, 80);
+            this.toolStrip2.Size = new System.Drawing.Size(32, 76);
             this.toolStrip2.TabIndex = 0;
             // 
             // colorPickerButton
@@ -139,7 +139,7 @@
             this.colorPickerButton.Image = ((System.Drawing.Image)(resources.GetObject("colorPickerButton.Image")));
             this.colorPickerButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.colorPickerButton.Name = "colorPickerButton";
-            this.colorPickerButton.Size = new System.Drawing.Size(22, 20);
+            this.colorPickerButton.Size = new System.Drawing.Size(30, 20);
             this.colorPickerButton.Text = "Color picker";
             this.colorPickerButton.Click += new System.EventHandler(this.colorPickerButton_Click);
             // 
@@ -150,17 +150,8 @@
             this.currentColorButton.Image = ((System.Drawing.Image)(resources.GetObject("currentColorButton.Image")));
             this.currentColorButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.currentColorButton.Name = "currentColorButton";
-            this.currentColorButton.Size = new System.Drawing.Size(22, 20);
+            this.currentColorButton.Size = new System.Drawing.Size(30, 20);
             this.currentColorButton.Text = "toolStripButton5";
-            // 
-            // toolStripButton6
-            // 
-            this.toolStripButton6.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton6.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton6.Image")));
-            this.toolStripButton6.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton6.Name = "toolStripButton6";
-            this.toolStripButton6.Size = new System.Drawing.Size(22, 20);
-            this.toolStripButton6.Text = "toolStripButton6";
             // 
             // toolStrip1
             // 
@@ -170,16 +161,18 @@
             this.newEmptyImageButton,
             this.saveButton,
             this.saveAsButton,
+            this.closeFileButton,
             this.toolStripSeparator1,
             this.toolSelectDropdownButton,
             this.rotateButton,
             this.degreesTextBox,
             this.degreesLabel,
             this.filterDropDownButton2,
-            this.historyDropDownButton});
+            this.historyDropDownButton,
+            this.collageButton});
             this.toolStrip1.Location = new System.Drawing.Point(3, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(305, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(320, 25);
             this.toolStrip1.TabIndex = 0;
             // 
             // openImageButton
@@ -221,6 +214,16 @@
             this.saveAsButton.Size = new System.Drawing.Size(23, 22);
             this.saveAsButton.Text = "Save As...";
             this.saveAsButton.Click += new System.EventHandler(this.saveAsButton_Click);
+            // 
+            // closeFileButton
+            // 
+            this.closeFileButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.closeFileButton.Image = ((System.Drawing.Image)(resources.GetObject("closeFileButton.Image")));
+            this.closeFileButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.closeFileButton.Name = "closeFileButton";
+            this.closeFileButton.Size = new System.Drawing.Size(23, 22);
+            this.closeFileButton.Text = "Close image";
+            this.closeFileButton.Click += new System.EventHandler(this.closeFileButton_Click);
             // 
             // toolStripSeparator1
             // 
@@ -395,14 +398,14 @@
             // 
             this.toolStripMenuItem2.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(89, 22);
             this.toolStripMenuItem2.Text = "---";
             this.toolStripMenuItem2.Click += new System.EventHandler(this.toolStripMenuItem2_Click);
             // 
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(89, 22);
             this.toolStripMenuItem3.Text = "---";
             this.toolStripMenuItem3.Visible = false;
             this.toolStripMenuItem3.Click += new System.EventHandler(this.toolStripMenuItem3_Click);
@@ -410,7 +413,7 @@
             // toolStripMenuItem4
             // 
             this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            this.toolStripMenuItem4.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(89, 22);
             this.toolStripMenuItem4.Text = "---";
             this.toolStripMenuItem4.Visible = false;
             this.toolStripMenuItem4.Click += new System.EventHandler(this.toolStripMenuItem4_Click);
@@ -418,7 +421,7 @@
             // toolStripMenuItem5
             // 
             this.toolStripMenuItem5.Name = "toolStripMenuItem5";
-            this.toolStripMenuItem5.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItem5.Size = new System.Drawing.Size(89, 22);
             this.toolStripMenuItem5.Text = "---";
             this.toolStripMenuItem5.Visible = false;
             this.toolStripMenuItem5.Click += new System.EventHandler(this.toolStripMenuItem5_Click);
@@ -426,10 +429,20 @@
             // toolStripMenuItem6
             // 
             this.toolStripMenuItem6.Name = "toolStripMenuItem6";
-            this.toolStripMenuItem6.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItem6.Size = new System.Drawing.Size(89, 22);
             this.toolStripMenuItem6.Text = "---";
             this.toolStripMenuItem6.Visible = false;
             this.toolStripMenuItem6.Click += new System.EventHandler(this.toolStripMenuItem6_Click);
+            // 
+            // collageButton
+            // 
+            this.collageButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.collageButton.Image = ((System.Drawing.Image)(resources.GetObject("collageButton.Image")));
+            this.collageButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.collageButton.Name = "collageButton";
+            this.collageButton.Size = new System.Drawing.Size(23, 22);
+            this.collageButton.Text = "New collage";
+            this.collageButton.Click += new System.EventHandler(this.collageButton_Click);
             // 
             // Form1
             // 
@@ -465,7 +478,6 @@
         private System.Windows.Forms.ToolStrip toolStrip2;
         private System.Windows.Forms.ToolStripButton colorPickerButton;
         private System.Windows.Forms.ToolStripButton currentColorButton;
-        private System.Windows.Forms.ToolStripButton toolStripButton6;
         private System.Windows.Forms.ToolStripButton saveButton;
         private System.Windows.Forms.ToolStripButton saveAsButton;
         private System.Windows.Forms.Panel panel1;
@@ -495,6 +507,8 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem5;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem6;
+        private System.Windows.Forms.ToolStripButton closeFileButton;
+        private System.Windows.Forms.ToolStripButton collageButton;
     }
 }
 

@@ -10,3 +10,4 @@ Currently implemented features are:
 - filters: sepia, grayscale, color inverse, opacity
 - history up to 5 recent moves
 - image rotation
+- image collage creation, collage layout creation

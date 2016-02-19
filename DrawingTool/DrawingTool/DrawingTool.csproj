@@ -44,6 +44,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CollageForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CollageForm.Designer.cs">
+      <DependentUpon>CollageForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CreateCollageLayoutForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CreateCollageLayoutForm.Designer.cs">
+      <DependentUpon>CreateCollageLayoutForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -52,6 +64,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="CollageForm.resx">
+      <DependentUpon>CollageForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CreateCollageLayoutForm.resx">
+      <DependentUpon>CreateCollageLayoutForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -63,6 +81,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -76,6 +95,30 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\heartsLayout.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\heartsLayoutLocations.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\mathLayout.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\mathLayoutLocations.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\smileLayout.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\smileLayoutLocations.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\tapeReelLayout.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\tapeReelLayoutLocations.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -554,11 +554,8 @@ namespace DrawingTool
             }
             for (int i = historyCount; i < 5; i++)
             {
-
                 historyMenuItems[i].Visible = false;
             }
-                
-
         }
    
         private void toolStripMenuItem6_Click(object sender, EventArgs e)
@@ -573,33 +570,37 @@ namespace DrawingTool
         {
             int index = historyCount - 4;
             pictureBox1.Image = getFromHistory(index); 
-            
-
         }
 
         private void toolStripMenuItem4_Click(object sender, EventArgs e)
         {
             int index = historyCount - 3;
             pictureBox1.Image = getFromHistory(index); 
-            
-
         }
 
         private void toolStripMenuItem3_Click(object sender, EventArgs e)
         {
             int index = historyCount - 2;
             pictureBox1.Image = getFromHistory(index); 
-            
-
         }
 
         private void toolStripMenuItem2_Click(object sender, EventArgs e)
         {
             int index = historyCount - 1;
             pictureBox1.Image = getFromHistory(index); 
-
         }
 
+        private void closeFileButton_Click(object sender, EventArgs e)
+        {
+            pictureBox1.Image = null;
+            currentImagePath = "";
+        }
+
+        private void collageButton_Click(object sender, EventArgs e)
+        {
+            CollageForm collageForm = new CollageForm();
+            collageForm.Show();
+        }
     }
 
 }
