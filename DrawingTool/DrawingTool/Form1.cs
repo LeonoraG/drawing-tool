@@ -9,58 +9,66 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Media;
 
 namespace DrawingTool
 {
     public partial class Form1 : Form
     {
         String currentImagePath = "";
+
+        int thickness = 1;
         Color currentColor = System.Drawing.ColorTranslator.FromHtml("#000000");
+        Color backColor = System.Drawing.ColorTranslator.FromHtml("#000000");
         String selectedTool = "pencil";
         bool filled = false;
         private Point? _Previous = null;
         private Point? _Initial = null;
+
         //for history
+        int max = 5;
+        int historyCount = 0;
         List<Image> historyImages = new List<Image>();
         List<String> historyMoves = new List<String>();
-        int historyCount = 0;
-        readonly int max = 5;
-        
-        
         
 
+        //select,cut,paste
+
+        int X0, Y0, X1, Y1;
+        bool selectionRectangleSet = false;
+        bool selectingArea = false;
+        Bitmap SelectedImage = null;
+        Bitmap OriginalImage = null;
+        Graphics SelectedGraphics = null;
+        Rectangle selection;
         
         public Form1()
         {
             InitializeComponent();
-            
         }
 
-       
-        private void openImageButton_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog dialog = new OpenFileDialog();
-            dialog.InitialDirectory = "c:\\";
-            dialog.Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png";
-            dialog.FilterIndex = 2;
-            dialog.RestoreDirectory = true;
-            dialog.Multiselect = false;
 
-            if (dialog.ShowDialog() == DialogResult.OK)
-            {
-                currentImagePath = dialog.FileName;
-                this.pictureBox1.Image = Image.FromFile(currentImagePath);
-                Bitmap bmp2 = new Bitmap(pictureBox1.Image);
-                Image img = bmp2;
-                saveToHistory(img, "New image from file: " + dialog.SafeFileName);
-            }
-        }
-        
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
-            _Previous = e.Location;
-            _Initial = e.Location;
-            pictureBox1_MouseMove(sender, e);
+            if (selectedTool == "selectionTool")
+            {
+                selectingArea = true;
+                X0 = e.X;
+                Y0 = e.Y;
+                _Initial = e.Location;
+                OriginalImage = new Bitmap(pictureBox1.Image);
+
+                SelectedImage = new Bitmap(OriginalImage);
+                SelectedGraphics = Graphics.FromImage(SelectedImage);
+                pictureBox1.Image = SelectedImage;
+            }
+            else
+            {
+                _Previous = e.Location;
+                _Initial = e.Location;
+                pictureBox1_MouseMove(sender, e);
+            }
+            
         }
 
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
@@ -78,25 +86,41 @@ namespace DrawingTool
                 }
                 using (Graphics g = Graphics.FromImage(pictureBox1.Image))
                 {
-                    Pen myPen = new Pen(currentColor);
+                    Pen myPen = new Pen(currentColor, thickness);
                     g.DrawLine(myPen, _Previous.Value, e.Location); //Pens.Black
                 }
                 pictureBox1.Invalidate();
                 _Previous = e.Location;
+            }
+            if (selectedTool == "selectionTool")
+            {
+                if (!selectingArea) return;
+                X1 = e.X;
+                Y1 = e.Y;
+
+                SelectedGraphics.DrawImage(OriginalImage, 0, 0);
+
+                using (Pen select_pen = new Pen(Color.Red))
+                {
+                    select_pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
+                    Rectangle rect = new Rectangle(X0,Y0,Math.Abs(X0-X1),Math.Abs(Y0-Y1));
+                    SelectedGraphics.DrawRectangle(select_pen, rect);
+                }
+
+                pictureBox1.Refresh();
             }
         }
 
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
             _Previous = null;
-            Pen myPen = new Pen(currentColor);
+            Pen myPen = new Pen(currentColor, thickness);
             Point? current = e.Location;
             if (selectedTool == "pencil")
             {
                 Bitmap bmp2 = new Bitmap(pictureBox1.Image);
                 Image img = bmp2;
                 saveToHistory(img, "New pencil drawing");
-                
             }
                 
             if (selectedTool == "square")
@@ -232,9 +256,32 @@ namespace DrawingTool
                     saveToHistory(img, "New ellipse");
 
             }
+            if (selectedTool == "selectionTool")
+            {
+                // Do nothing if we're not selecting an area.
+                if (!selectingArea) return;
+                selectingArea = false;
+
+                // Stop selecting.
+                SelectedGraphics = null;
+
+                // Convert the points into a Rectangle.
+                selection = new Rectangle(X0, Y0, Math.Abs(X0 - X1), Math.Abs(Y0 - Y1));
+                selectionRectangleSet = (
+                    (selection.Width > 0) &&
+                    (selection.Height > 0));
+                this.cutButton.Enabled = true;
+                this.copyButton.Enabled = true;
+                selectedTool = "";
+                
+                if (Clipboard.GetImage() != null)
+                {
+                    this.pasteButton.Enabled = true;
+                }
+            }
         }
 
-        
+        #region openSaveImage
         private void colorPickerButton_Click(object sender, EventArgs e)
         {
             ColorDialog MyDialog = new ColorDialog();
@@ -246,13 +293,64 @@ namespace DrawingTool
             this.currentColorButton.BackColor = currentColor;
         }
 
-        
+        private void openImageButton_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.InitialDirectory = "c:\\";
+            dialog.Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png";
+            dialog.FilterIndex = 2;
+            dialog.RestoreDirectory = true;
+            dialog.Multiselect = false;
+
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                currentImagePath = dialog.FileName;
+                this.pictureBox1.Image = Image.FromFile(currentImagePath);
+                Bitmap bmp2 = new Bitmap(pictureBox1.Image);
+                Image img = bmp2;
+                saveToHistory(img, "New image from file: " + dialog.SafeFileName);
+
+            }
+        }
+        private void newEmptyImage_Click(object sender, EventArgs e)
+        {
+            Bitmap bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                g.Clear(Color.White);
+            }
+            pictureBox1.Image = bmp;
+            Bitmap bmp2 = new Bitmap(pictureBox1.Image);
+            Image img = bmp2;
+            saveToHistory(bmp2, "New empty image");
+        }
         private void saveButton_Click(object sender, EventArgs e)
         {
             if(currentImagePath!="")
                 pictureBox1.Image.Save(currentImagePath);
         }
+        private void saveAsButton_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
 
+            saveFileDialog1.Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png";
+            saveFileDialog1.FilterIndex = 2;
+            saveFileDialog1.RestoreDirectory = true;
+
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                String name = saveFileDialog1.FileName;
+                pictureBox1.Image.Save(name);
+            }
+        }
+        private void closeFileButton_Click(object sender, EventArgs e)
+        {
+            pictureBox1.Image = null;
+            currentImagePath = "";
+        }
+        #endregion openSaveImage
+
+        #region tools
         private void pencilToolStripMenuItem_Click(object sender, EventArgs e)
         {
             selectedTool = "pencil";
@@ -287,7 +385,35 @@ namespace DrawingTool
             filled = false;
             this.toolSelectDropdownButton.Image = ((System.Drawing.Image)(resources1.GetObject("squareToolStripMenuItem.Image")));
         }
+        private void filledCircleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            selectedTool = "circle";
+            filled = true;
+            this.toolSelectDropdownButton.Image = ((System.Drawing.Image)(resources1.GetObject("filledCircleToolStripMenuItem.Image")));
+        }
 
+        private void filledEllipseToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            selectedTool = "ellipse";
+            filled = true;
+            this.toolSelectDropdownButton.Image = ((System.Drawing.Image)(resources1.GetObject("filledEllipseToolStripMenuItem.Image")));
+        }
+
+        private void filledSquareToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            selectedTool = "square";
+            filled = true;
+            this.toolSelectDropdownButton.Image = ((System.Drawing.Image)(resources1.GetObject("filledSquareToolStripMenuItem.Image")));
+        }
+
+        private void collageButton_Click(object sender, EventArgs e)
+        {
+            CollageForm collageForm = new CollageForm();
+            collageForm.Show();
+        }
+        #endregion tools
+
+        #region rotate
         private Bitmap RotateBitmap(Bitmap bm, float angle)
         {
             Matrix rotate_at_origin = new Matrix();
@@ -343,26 +469,7 @@ namespace DrawingTool
             }
         }
 
-        private void filledCircleToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            selectedTool = "circle";
-            filled = true;
-            this.toolSelectDropdownButton.Image = ((System.Drawing.Image)(resources1.GetObject("filledCircleToolStripMenuItem.Image")));
-        }
-
-        private void filledEllipseToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            selectedTool = "ellipse";
-            filled = true;
-            this.toolSelectDropdownButton.Image = ((System.Drawing.Image)(resources1.GetObject("filledEllipseToolStripMenuItem.Image")));
-        }
-
-        private void filledSquareToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            selectedTool = "square";
-            filled = true;
-            this.toolSelectDropdownButton.Image = ((System.Drawing.Image)(resources1.GetObject("filledSquareToolStripMenuItem.Image")));
-        }
+        
 
         private void rotateButton_Click(object sender, EventArgs e)
         {
@@ -372,7 +479,7 @@ namespace DrawingTool
                 angle = float.Parse(txt);
             else
                 angle = 0.0f;
-            //angle = 90.0f;
+
             if (pictureBox1.Image == null)
             {
                 Bitmap bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
@@ -389,34 +496,9 @@ namespace DrawingTool
             saveToHistory(img, "Rotation for angle: " + angle);
         }
 
-        private void newEmptyImage_Click(object sender, EventArgs e)
-        {
-            Bitmap bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
-            using (Graphics g = Graphics.FromImage(bmp))
-            {
-                g.Clear(Color.White);
-            }
-            pictureBox1.Image = bmp;
-            Bitmap bmp2 = new Bitmap(pictureBox1.Image);
-            Image img = bmp2;
-            saveToHistory(bmp2, "New empty image");
-        }
+        #endregion rotate
 
-        private void saveAsButton_Click(object sender, EventArgs e)
-        {
-            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-
-            saveFileDialog1.Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png";
-            saveFileDialog1.FilterIndex = 2;
-            saveFileDialog1.RestoreDirectory = true;
-
-            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
-            {
-                String name = saveFileDialog1.FileName;
-                pictureBox1.Image.Save(name);
-            }
-        }
-
+        #region filters
         private static Bitmap ApplyColorMatrix(Image sourceImage, ColorMatrix colorMatrix)
         {
             Bitmap bmp32BppSource = GetArgbCopy(sourceImage);
@@ -504,7 +586,9 @@ namespace DrawingTool
             pictureBox1.Image = ApplyColorMatrix(pictureBox1.Image, colorMatrix);
             saveToHistory(pictureBox1.Image, "Color negative filter");
         }
+        #endregion filters
 
+        #region history
         private void saveToHistory(Image img, String desc)
         {
             if (historyCount < max)
@@ -539,6 +623,8 @@ namespace DrawingTool
             updateTags();
             return returnImg;
         }
+
+        //updates the tags in history dropdown menu
         private void updateTags()
         {
             
@@ -590,17 +676,162 @@ namespace DrawingTool
             pictureBox1.Image = getFromHistory(index); 
         }
 
-        private void closeFileButton_Click(object sender, EventArgs e)
+        #endregion history
+
+        #region cutCopyPasteSelect
+        private void copyButton_Click(object sender, EventArgs e)
         {
-            pictureBox1.Image = null;
-            currentImagePath = "";
+            Bitmap bm = new Bitmap(selection.Width, selection.Height);
+
+            using (Graphics gr = Graphics.FromImage(bm))
+            {
+
+                Rectangle src_rect =
+                    new Rectangle(selection.X + 1, selection.Y + 1, selection.Width - 1, selection.Height - 1);
+
+                Rectangle dest_rect =
+                    new Rectangle(0, 0, selection.Width + 1, selection.Height + 1);
+                gr.DrawImage(pictureBox1.Image, dest_rect, src_rect,
+                    GraphicsUnit.Pixel);
+
+
+            }
+            Clipboard.SetImage(bm);
+            pictureBox1.Image = OriginalImage;
+            pictureBox1.Refresh();
+            this.cutButton.Enabled = false;
+            this.copyButton.Enabled = false;
         }
 
-        private void collageButton_Click(object sender, EventArgs e)
+        private void cutButton_Click(object sender, EventArgs e)
         {
-            CollageForm collageForm = new CollageForm();
-            collageForm.Show();
+            OriginalImage = new Bitmap(pictureBox1.Image);
+            Bitmap bm = new Bitmap(selection.Width, selection.Height);
+
+            using (Graphics gr = Graphics.FromImage(bm))
+            {
+                Rectangle dest_rect =
+                    new Rectangle(0, 0, selection.Width, selection.Height);
+                gr.DrawImage(pictureBox1.Image, dest_rect, selection,
+                    GraphicsUnit.Pixel);
+            }
+            Clipboard.SetImage(bm);
+
+            using (Graphics gr = Graphics.FromImage(OriginalImage))
+            {
+                using (SolidBrush br = new SolidBrush(backColor))
+                {
+                    Rectangle fillRect = new Rectangle(selection.X, selection.Y, selection.Width + 1, selection.Height + 1);
+                    gr.FillRectangle(br, fillRect);
+                }
+            }
+
+            SelectedImage = new Bitmap(OriginalImage);
+            pictureBox1.Image = SelectedImage;
+
+            SelectedImage = null;
+            SelectedGraphics = null;
+            
+            this.cutButton.Enabled = false;
+            this.copyButton.Enabled = false;
         }
+
+        private void pasteButton_Click(object sender, EventArgs e)
+        {
+            // Do nothing if the clipboard doesn't hold an image.
+            if (!Clipboard.ContainsImage()) return;
+
+            // Get the clipboard's image.
+            Image clipboard_image = Clipboard.GetImage();
+
+            // Figure out where to put it.
+            int cx = selection.X +
+                (selection.Width - clipboard_image.Width) / 2;
+            int cy = selection.Y +
+                (selection.Height - clipboard_image.Height) / 2;
+            Rectangle dest_rect = new Rectangle(
+                cx, cy,
+                clipboard_image.Width,
+                clipboard_image.Height);
+
+            using (Graphics gr = Graphics.FromImage(OriginalImage))
+            {
+                gr.DrawImage(clipboard_image, dest_rect);
+            }
+
+            pictureBox1.Image = OriginalImage;
+            pictureBox1.Refresh();
+
+            SelectedImage = null;
+            SelectedGraphics = null;
+            selectionRectangleSet = false;
+        }
+        private void selectButton_Click(object sender, EventArgs e)
+        {
+            selectedTool = "selectionTool";
+        }
+        #endregion cutCopyPasteSelect
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Modifiers == Keys.Control && e.KeyCode == Keys.C)
+            {
+                if(!copyButton.Enabled)
+                    SystemSounds.Beep.Play();
+                else
+                    copyButton_Click(sender, e);
+                return;
+            }
+
+            if (e.Modifiers == Keys.Control && e.KeyCode == Keys.X)
+            {
+                if(!cutButton.Enabled)
+                    SystemSounds.Beep.Play();
+                else
+                    cutButton_Click(sender, e);
+                return;
+            }
+
+            if (e.Modifiers == Keys.Control && e.KeyCode == Keys.V)
+            {
+                if(!pasteButton.Enabled)
+                    SystemSounds.Beep.Play();
+                else
+                    pasteButton_Click(sender, e);
+                return;
+            }
+        }
+
+        #region lineThickness
+        private void px1ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            thickness = 1;
+            px5ToolStripMenuItem.Checked = false;
+            px10ToolStripMenuItem.Checked = false;
+            px15ToolStripMenuItem.Checked = false;
+        }
+
+        private void px5ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            thickness = 5;
+            px1ToolStripMenuItem.Checked = false;
+            px10ToolStripMenuItem.Checked = false;
+            px15ToolStripMenuItem.Checked = false;
+        }
+        private void px10ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            thickness = 10;
+            px1ToolStripMenuItem.Checked = false;
+            px5ToolStripMenuItem.Checked = false;
+            px15ToolStripMenuItem.Checked = false;
+        }
+
+        private void px15ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            thickness = 15;
+            px1ToolStripMenuItem.Checked = false;
+            px5ToolStripMenuItem.Checked = false;
+            px10ToolStripMenuItem.Checked = false;
+        }
+        #endregion lineThickness
     }
-
 }
