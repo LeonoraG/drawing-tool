@@ -19,11 +19,12 @@ namespace DrawingTool
         List<Image> imagesToInsert = new List<Image>();
         //each tuple contains the coordinates where the images will be inserted
         // (x1,y1,x2,y2)
-        //where x1,y1 is the position of upper left corner
-        // x2,y2 the position of lower right corner
+        // x1,y1 is the position of upper left corner
+        // x2,y2 is the position of lower right corner
         List<Tuple<int, int, int, int>> positions = new List<Tuple<int, int, int, int>>();
         
         int numOfImages = 0;
+
         public CollageForm()
         {
             InitializeComponent();
@@ -37,13 +38,11 @@ namespace DrawingTool
             {
                 String[] paths = dialog.FileNames;
                 String currentImagePath = "";
-                bool containsLocations = false;
-                bool containsImage = false;
                 foreach (String path in paths)
                 {
                     if (path.EndsWith(".txt"))
                     {
-                        containsLocations = true;
+                        loadImagesButton.Enabled = true;
                         using (StreamReader sr = File.OpenText(path))
                         {
                             string s = "";
@@ -68,9 +67,9 @@ namespace DrawingTool
                     }
                     if (path.EndsWith(".png") || path.EndsWith(".jpg") || path.EndsWith(".gif"))
                     {
-                        containsImage = true;
                         currentImagePath = path;
                         this.pictureBox1.Image = Image.FromFile(currentImagePath);
+                        saveAsButton.Enabled = true;
                     }
                 }
                 
@@ -87,7 +86,6 @@ namespace DrawingTool
         {
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Multiselect = true;
-            //dialog.ShowDialog();
             dialog.Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png";
             dialog.FilterIndex = 2;
             if (dialog.ShowDialog() == DialogResult.OK)
@@ -141,13 +139,13 @@ namespace DrawingTool
             Console.WriteLine("x: " + x + "y: " + y);
             foreach (Tuple<int, int, int, int> t in positions)
             {
-                Console.WriteLine("x: " + t.Item1 + " x2: " + t.Item3);
+                //if we clicket within bounds of a rectangle to contain image
+                //open the openFileDialog
                 if (t.Item1 <= x && x <= t.Item3 &&
                    t.Item2 <= y && y <= t.Item4)
                 {
                     OpenFileDialog dialog = new OpenFileDialog();
                     dialog.Multiselect = false;
-                    //dialog.ShowDialog();
                     dialog.Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png";
                     dialog.FilterIndex = 2;
                     if (dialog.ShowDialog() == DialogResult.OK)
@@ -156,9 +154,9 @@ namespace DrawingTool
                         Image img_ = Image.FromFile(filename);
                         int width = t.Item3 - t.Item1;
                         int height = t.Item4 - t.Item2;
-                        Console.WriteLine("w:" + width + ", h" + height);
-                        Rectangle destRect = new Rectangle(t.Item1, t.Item2, width + 1, height + 1);
 
+                        //load the selected image
+                        Rectangle destRect = new Rectangle(t.Item1, t.Item2, width + 1, height + 1);
                         Graphics g = Graphics.FromImage(pictureBox1.Image);
                         g.DrawImage(img_, destRect);
                         pictureBox1.Invalidate();
@@ -172,6 +170,7 @@ namespace DrawingTool
             Image img = DrawingTool.Properties.Resources.smileLayout;
             pictureBox1.Image = img;
             String fileContent = DrawingTool.Properties.Resources.smileLayoutLocations;
+            //load the positions for images
             using (var reader = new StringReader(fileContent))
             {
                 string s = "";
@@ -193,6 +192,8 @@ namespace DrawingTool
                     }
                 }
             }
+            saveAsButton.Enabled = true;
+            loadImagesButton.Enabled = true;
         }
 
         private void notebookPresetButton_Click(object sender, EventArgs e)
@@ -200,6 +201,7 @@ namespace DrawingTool
             Image img = DrawingTool.Properties.Resources.mathLayout;
             pictureBox1.Image = img;
             String fileContent = DrawingTool.Properties.Resources.mathLayoutLocations;
+            //load the positions for images
             using (var reader = new StringReader(fileContent))
             {
                 string s = "";
@@ -221,6 +223,8 @@ namespace DrawingTool
                     }
                 }
             }
+            saveAsButton.Enabled = true;
+            loadImagesButton.Enabled = true;
         }
 
         private void moviePresetButton_Click(object sender, EventArgs e)
@@ -228,7 +232,7 @@ namespace DrawingTool
             Image img = DrawingTool.Properties.Resources.tapeReelLayout;
             pictureBox1.Image = img;
             String fileContent = DrawingTool.Properties.Resources.tapeReelLayoutLocations;
-            //smile movie notebook hearts
+            //load the positions for images
             using (var reader = new StringReader(fileContent))
             {
                 string s = "";
@@ -250,6 +254,8 @@ namespace DrawingTool
                     }
                 }
             }
+            saveAsButton.Enabled = true;
+            loadImagesButton.Enabled = true;
         }
 
         private void heartsPresetButton_Click(object sender, EventArgs e)
@@ -257,7 +263,7 @@ namespace DrawingTool
             Image img = DrawingTool.Properties.Resources.heartsLayout;
             pictureBox1.Image = img;
             String fileContent = DrawingTool.Properties.Resources.heartsLayoutLocations;
-            //smile movie notebook hearts
+            //load the positions for images
             using (var reader = new StringReader(fileContent))
             {
                 string s = "";
@@ -279,13 +285,19 @@ namespace DrawingTool
                     }
                 }
             }
+            saveAsButton.Enabled = true;
+            loadImagesButton.Enabled = true;
         }
 
         private void closeButton_Click(object sender, EventArgs e)
         {
+            //reset the variables
             pictureBox1.Image = null;
             positions = new List<Tuple<int, int, int, int>>();
             numOfImages = 0;
+            //disable the buttons
+            saveAsButton.Enabled = false;
+            loadImagesButton.Enabled = false;
         }
     }
 }

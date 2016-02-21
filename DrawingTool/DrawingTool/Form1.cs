@@ -22,8 +22,13 @@ namespace DrawingTool
         Color backColor = System.Drawing.ColorTranslator.FromHtml("#000000");
         String selectedTool = "pencil";
         bool filled = false;
-        private Point? _Previous = null;
-        private Point? _Initial = null;
+        private Point? previous = null;
+        private Point? initial = null;
+        Point? current = null;
+        //for drawing
+        Rectangle r;
+        bool finalPaint = false;
+        bool drawing = false;
 
         //for history
         int max = 5;
@@ -45,35 +50,50 @@ namespace DrawingTool
         public Form1()
         {
             InitializeComponent();
+            degreesTextBox.Text = "0,0";
         }
 
 
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
+            initial = e.Location;
+            current = initial;
+            X0 = e.X;
+            Y0 = e.Y;
+            OriginalImage = new Bitmap(pictureBox1.Image);
+
             if (selectedTool == "selectionTool")
             {
                 selectingArea = true;
-                X0 = e.X;
-                Y0 = e.Y;
-                _Initial = e.Location;
-                OriginalImage = new Bitmap(pictureBox1.Image);
-
                 SelectedImage = new Bitmap(OriginalImage);
                 SelectedGraphics = Graphics.FromImage(SelectedImage);
                 pictureBox1.Image = SelectedImage;
             }
-            else
+            else if (selectedTool == "pencil")
             {
-                _Previous = e.Location;
-                _Initial = e.Location;
+                previous = e.Location;
+
                 pictureBox1_MouseMove(sender, e);
             }
-            
+            else if (selectedTool == "line")
+            {
+                drawing = true;
+                pictureBox1.Invalidate();
+
+            }
+            else{
+                drawing = true;
+                r = new Rectangle(e.X, e.Y, 0, 0);
+                pictureBox1.Invalidate();
+            }
         }
 
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
         {
-            if (_Previous != null && selectedTool == "pencil")
+            current = e.Location;
+            Pen myPen = new Pen(currentColor, thickness);
+
+            if (previous != null && selectedTool == "pencil")
             {
                 if (pictureBox1.Image == null)
                 {
@@ -86,12 +106,34 @@ namespace DrawingTool
                 }
                 using (Graphics g = Graphics.FromImage(pictureBox1.Image))
                 {
-                    Pen myPen = new Pen(currentColor, thickness);
-                    g.DrawLine(myPen, _Previous.Value, e.Location); //Pens.Black
+                    System.Drawing.SolidBrush myBrush = new System.Drawing.SolidBrush(currentColor);
+                    Rectangle temp = r = new Rectangle(current.Value.X, current.Value.Y, thickness, thickness);
+                    if (thickness == 1)
+                        g.FillRectangle(myBrush, current.Value.X, current.Value.Y,1,1);
+                    else
+                        g.FillEllipse(myBrush, r);
                 }
                 pictureBox1.Invalidate();
-                _Previous = e.Location;
+                previous = e.Location;
             }
+            if ((selectedTool == "rectangle" || selectedTool == "ellipse") && drawing)
+            {
+                r = new Rectangle(Math.Min(X0, e.X), Math.Min(Y0, e.Y), Math.Abs(e.X - X0), Math.Abs(e.Y - Y0));
+                
+                pictureBox1.Invalidate();
+            }
+            if ((selectedTool == "square" || selectedTool == "circle") && drawing) 
+            {
+                int l = Math.Max(Math.Abs(e.X - X0), Math.Abs(e.Y - Y0));
+                r = new Rectangle(Math.Min(X0, e.X), Math.Min(Y0, e.Y), l, l);
+
+                pictureBox1.Invalidate();
+            }
+            if (selectedTool == "line" && drawing)
+            {
+                pictureBox1.Invalidate();
+            }
+            
             if (selectedTool == "selectionTool")
             {
                 if (!selectingArea) return;
@@ -113,149 +155,42 @@ namespace DrawingTool
 
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
-            _Previous = null;
+            previous = null;
             Pen myPen = new Pen(currentColor, thickness);
-            Point? current = e.Location;
+            current = e.Location;
             if (selectedTool == "pencil")
             {
                 Bitmap bmp2 = new Bitmap(pictureBox1.Image);
                 Image img = bmp2;
                 saveToHistory(img, "New pencil drawing");
             }
-                
-            if (selectedTool == "square")
-            {
-                int _x = _Initial.Value.X;
-                int _y = _Initial.Value.Y;
-                int height = current.Value.Y- _Initial.Value.Y;
-                int width = current.Value.X - _Initial.Value.X; 
 
-                Rectangle ee = new Rectangle(_x,_y , Math.Abs(width), Math.Abs(height));
-                
-                if (pictureBox1.Image == null)
-                {
-                    Bitmap bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
-                    using (Graphics g = Graphics.FromImage(bmp))
-                    {
-                        g.Clear(Color.White);
-                    }
-                    pictureBox1.Image = bmp;
-                }
-                using (Graphics g = Graphics.FromImage(pictureBox1.Image))
-                {
-                    if (filled)
-                    {
-                        System.Drawing.SolidBrush myBrush = new System.Drawing.SolidBrush(currentColor);
-                        g.FillRectangle(myBrush, new Rectangle(_x, _y, width, height));
-                    }
-                    else
-                        g.DrawRectangle(myPen, ee);
-                                
-                }
+            if (selectedTool == "square" || selectedTool == "ellipse" || selectedTool == "circle" || selectedTool == "rectangle")
+            {
+                finalPaint = true;
                 pictureBox1.Invalidate();
+                drawing = false;
                 Bitmap bmp2 = new Bitmap(pictureBox1.Image);
                 Image img = bmp2;
-                if(filled)
-                    saveToHistory(img, "New filled rectangle");
+                if (filled)
+                    saveToHistory(img, "New filled " + selectedTool);
                 else
-                    saveToHistory(img, "New rectangle");
-                
+                    saveToHistory(img, "New " + selectedTool);
             }
+           
             if (selectedTool == "line")
             {
                 
-
-                if (pictureBox1.Image == null)
-                {
-                    Bitmap bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
-                    using (Graphics g = Graphics.FromImage(bmp))
-                    {
-                        g.Clear(Color.White);
-                    }
-                    pictureBox1.Image = bmp;
-                }
-                using (Graphics g = Graphics.FromImage(pictureBox1.Image))
-                {
-                    g.DrawLine(myPen, (System.Drawing.PointF)_Initial, (System.Drawing.PointF)current);
-
-                }
+                finalPaint = true;
                 pictureBox1.Invalidate();
+                drawing = false;
                 Bitmap bmp2 = new Bitmap(pictureBox1.Image);
                 Image img = bmp2;
                 saveToHistory(img, "New line");
                 
             }
-            if (selectedTool == "circle")
-            {
-                int _x = _Initial.Value.X;
-                int _y = _Initial.Value.Y;
-                int radius = current.Value.Y - _Initial.Value.Y;
-                
- 
-                if (pictureBox1.Image == null)
-                {
-                    Bitmap bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
-                    using (Graphics g = Graphics.FromImage(bmp))
-                    {
-                        g.Clear(Color.White);
-                    }
-                    pictureBox1.Image = bmp;
-                }
-                using (Graphics g = Graphics.FromImage(pictureBox1.Image))
-                {
-                    if(filled){
-                        System.Drawing.SolidBrush myBrush = new System.Drawing.SolidBrush(currentColor);
-                        g.FillEllipse(myBrush, new Rectangle(_x, _y, radius * 2, radius * 2));                      
-                    }
-                    else  
-                        g.DrawEllipse(myPen, _x, _y, radius * 2, radius * 2);
-                    
-                        
-                }
-                pictureBox1.Invalidate();
-                Bitmap bmp2 = new Bitmap(pictureBox1.Image);
-                Image img = bmp2;
-                if(filled)
-                    saveToHistory(img, "New filled circle");
-                else
-                    saveToHistory(img, "New circle");
-                
-            }
-            if (selectedTool == "ellipse")
-            {
-                int _x = _Initial.Value.X;
-                int _y = _Initial.Value.Y;
-                int height = current.Value.Y - _Initial.Value.Y;
-                int width = current.Value.X - _Initial.Value.X; 
-
-                if (pictureBox1.Image == null)
-                {
-                    Bitmap bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
-                    using (Graphics g = Graphics.FromImage(bmp))
-                    {
-                        g.Clear(Color.White);
-                    }
-                    pictureBox1.Image = bmp;
-                }
-                using (Graphics g = Graphics.FromImage(pictureBox1.Image))
-                {
-                    if (filled)
-                    {
-                        System.Drawing.SolidBrush myBrush = new System.Drawing.SolidBrush(currentColor);
-                        g.FillEllipse(myBrush, new Rectangle(_x, _y, width, height));
-                    }
-                    else
-                        g.DrawEllipse(myPen, _x, _y, width, height);
-                }
-                pictureBox1.Invalidate();
-                Bitmap bmp2 = new Bitmap(pictureBox1.Image);
-                Image img = bmp2;
-                if (filled)
-                    saveToHistory(img, "New filled ellipse");
-                else
-                    saveToHistory(img, "New ellipse");
-
-            }
+            
+            
             if (selectedTool == "selectionTool")
             {
                 // Do nothing if we're not selecting an area.
@@ -281,7 +216,7 @@ namespace DrawingTool
             }
         }
 
-        #region openSaveImage
+        
         private void colorPickerButton_Click(object sender, EventArgs e)
         {
             ColorDialog MyDialog = new ColorDialog();
@@ -293,6 +228,7 @@ namespace DrawingTool
             this.currentColorButton.BackColor = currentColor;
         }
 
+        #region openSaveImage
         private void openImageButton_Click(object sender, EventArgs e)
         {
             OpenFileDialog dialog = new OpenFileDialog();
@@ -304,25 +240,48 @@ namespace DrawingTool
 
             if (dialog.ShowDialog() == DialogResult.OK)
             {
+                //loading the image to the form
                 currentImagePath = dialog.FileName;
                 this.pictureBox1.Image = Image.FromFile(currentImagePath);
+
+                //saving to history
                 Bitmap bmp2 = new Bitmap(pictureBox1.Image);
                 Image img = bmp2;
                 saveToHistory(img, "New image from file: " + dialog.SafeFileName);
 
+                //enabling the buttons
+                toolSelectDropdownButton.Enabled = true;
+                filterDropDownButton2.Enabled = true;
+                saveAsButton.Enabled = true;
+                saveButton.Enabled = true;
+                closeFileButton.Enabled = true;
+                rotateButton.Enabled = true;
+                selectButton.Enabled = true;
             }
         }
         private void newEmptyImage_Click(object sender, EventArgs e)
         {
+            //creating an empty image
             Bitmap bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
             using (Graphics g = Graphics.FromImage(bmp))
             {
                 g.Clear(Color.White);
             }
             pictureBox1.Image = bmp;
+
+            //saving to history
             Bitmap bmp2 = new Bitmap(pictureBox1.Image);
             Image img = bmp2;
-            saveToHistory(bmp2, "New empty image");
+            saveToHistory(img, "New empty image");
+
+            //enabling the buttons
+            toolSelectDropdownButton.Enabled = true;
+            filterDropDownButton2.Enabled = true;
+            saveAsButton.Enabled = true;
+            saveButton.Enabled = true;
+            closeFileButton.Enabled = true;
+            rotateButton.Enabled = true;
+            selectButton.Enabled = true;
         }
         private void saveButton_Click(object sender, EventArgs e)
         {
@@ -345,8 +304,21 @@ namespace DrawingTool
         }
         private void closeFileButton_Click(object sender, EventArgs e)
         {
+            //reseting the values
             pictureBox1.Image = null;
             currentImagePath = "";
+            historyImages = new List<Image>();
+            historyMoves = new List<String>();
+            historyCount = 0;
+
+            //disabling the buttons...
+            toolSelectDropdownButton.Enabled = false;
+            filterDropDownButton2.Enabled = false;
+            saveAsButton.Enabled = false;
+            saveButton.Enabled = false;
+            closeFileButton.Enabled = false;
+            rotateButton.Enabled = false;
+            selectButton.Enabled = false;
         }
         #endregion openSaveImage
 
@@ -376,7 +348,7 @@ namespace DrawingTool
         {
             selectedTool = "ellipse";
             filled = false;
-            this.toolSelectDropdownButton.Image = ((System.Drawing.Image)(resources1.GetObject("ellipseToolStripMenuItem.Imagee")));
+            this.toolSelectDropdownButton.Image = ((System.Drawing.Image)(resources1.GetObject("ellipseToolStripMenuItem.Image")));
         }
 
         private void squareToolStripMenuItem_Click(object sender, EventArgs e)
@@ -384,6 +356,12 @@ namespace DrawingTool
             selectedTool = "square";
             filled = false;
             this.toolSelectDropdownButton.Image = ((System.Drawing.Image)(resources1.GetObject("squareToolStripMenuItem.Image")));
+        }
+        private void rectangleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            selectedTool = "rectangle";
+            filled = false;
+            this.toolSelectDropdownButton.Image = ((System.Drawing.Image)(resources1.GetObject("rectangleToolStripMenuItem.Image")));
         }
         private void filledCircleToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -405,7 +383,13 @@ namespace DrawingTool
             filled = true;
             this.toolSelectDropdownButton.Image = ((System.Drawing.Image)(resources1.GetObject("filledSquareToolStripMenuItem.Image")));
         }
-
+        private void filledRectangleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            selectedTool = "rectangle";
+            filled = true;
+            this.toolSelectDropdownButton.Image = ((System.Drawing.Image)(resources1.GetObject("rectangleToolStripMenuItem.Image")));
+        }
+        
         private void collageButton_Click(object sender, EventArgs e)
         {
             CollageForm collageForm = new CollageForm();
@@ -419,6 +403,7 @@ namespace DrawingTool
             Matrix rotate_at_origin = new Matrix();
             rotate_at_origin.Rotate(angle);
 
+            //calculating how big final image should be
             PointF[] points =
             {
                 new PointF(0, 0),
@@ -452,8 +437,7 @@ namespace DrawingTool
         }
 
  
-        private void GetPointBounds(PointF[] points,
-            out float xmin, out float xmax,
+        private void GetPointBounds(PointF[] points, out float xmin, out float xmax,
             out float ymin, out float ymax)
         {
             xmin = points[0].X;
@@ -480,17 +464,9 @@ namespace DrawingTool
             else
                 angle = 0.0f;
 
-            if (pictureBox1.Image == null)
-            {
-                Bitmap bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
-                using (Graphics g = Graphics.FromImage(bmp))
-                {
-                    g.Clear(Color.White);
-                }
-                pictureBox1.Image = bmp;
-            }
-
             pictureBox1.Image = RotateBitmap((Bitmap)pictureBox1.Image, angle);
+
+            //saving to history
             Bitmap bmp2 = new Bitmap(pictureBox1.Image);
             Image img = bmp2;
             saveToHistory(img, "Rotation for angle: " + angle);
@@ -499,6 +475,7 @@ namespace DrawingTool
         #endregion rotate
 
         #region filters
+        //applies the color matrix to copy of the image
         private static Bitmap ApplyColorMatrix(Image sourceImage, ColorMatrix colorMatrix)
         {
             Bitmap bmp32BppSource = GetArgbCopy(sourceImage);
@@ -517,6 +494,7 @@ namespace DrawingTool
             return bmp32BppDest;
         }
 
+        //creates the argb copy of an image
         private static Bitmap GetArgbCopy(Image sourceImage)
         {
             Bitmap bmpNew = new Bitmap(sourceImage.Width, sourceImage.Height, PixelFormat.Format32bppArgb);
@@ -530,12 +508,13 @@ namespace DrawingTool
 
         private void transparency_Click(object sender, EventArgs e)
         {
+            //we reduce the alpha component by 60%
             ColorMatrix colorMatrix = new ColorMatrix(new float[][]
                         {
                             new float[]{1, 0, 0, 0, 0},
                             new float[]{0, 1, 0, 0, 0},
                             new float[]{0, 0, 1, 0, 0},
-                            new float[]{0, 0, 0, 0.3f, 0},
+                            new float[]{0, 0, 0, 0.4f, 0},
                             new float[]{0, 0, 0, 0, 1}
                         });
             pictureBox1.Image = ApplyColorMatrix(pictureBox1.Image, colorMatrix);
@@ -545,6 +524,7 @@ namespace DrawingTool
 
         private void grayscale_Click(object sender, EventArgs e)
         {
+            //The grayscale is achieved by using 11% blue, 59% green and 30% red
             ColorMatrix colorMatrix = new ColorMatrix(new float[][]
                         {
                             new float[]{.3f, .3f, .3f, 0, 0},
@@ -574,6 +554,7 @@ namespace DrawingTool
         }
         private void negative_Click(object sender, EventArgs e)
         {
+            //Negative inverts the colors
             ColorMatrix colorMatrix = new ColorMatrix(new float[][] 
                     {
                             new float[]{-1, 0, 0, 0, 0},
@@ -591,12 +572,16 @@ namespace DrawingTool
         #region history
         private void saveToHistory(Image img, String desc)
         {
+            //when we have less than max moves saved
+            //we simply add the image and description
+            //to the history
             if (historyCount < max)
             {
                 historyImages.Add(img);
                 historyMoves.Add(desc);
                 historyCount++;
             }
+            //otherwise, we reject the oldest entry
             else
             {
                 historyImages.RemoveAt(0);
@@ -604,15 +589,21 @@ namespace DrawingTool
                 historyImages.Add(img);
                 historyMoves.Add(desc);
             }
+            //update the descriptions in the 
+            //history drop down menu
             updateTags();
         }
         private Image getFromHistory(int index)
         {           
             Image returnImg;
+            //fetch the image and description
             returnImg = historyImages[index];   
             string tag = historyMoves[index];
+
             int k = index + 1;
             int historyCountCopy = historyCount;
+            //discard the changes that happened after
+            //retrieved move
             for (int i = index + 1; i < historyCount; ++i)
             {
                 historyImages.RemoveAt(k);
@@ -620,22 +611,25 @@ namespace DrawingTool
                 historyCountCopy--;
             }
             historyCount = historyCountCopy;
+            //update the descriptions in the 
+            //history drop down menu
             updateTags();
             return returnImg;
         }
 
-        //updates the tags in history dropdown menu
         private void updateTags()
         {
             
             ToolStripMenuItem[] historyMenuItems = {toolStripMenuItem2,toolStripMenuItem3,toolStripMenuItem4, 
                                                        toolStripMenuItem5, toolStripMenuItem6 };
+            //the newest entry is current move
             historyMenuItems[0].Text = historyMoves[historyCount - 1] + " (current)";
             historyMenuItems[0].Visible = true;
 
             for (int i = 1; i < historyCount; i++)
             {
                 historyMenuItems[i].Text = historyMoves[historyCount - i - 1];
+                //items containing text are visible
                 historyMenuItems[i].Visible = true;
             }
             for (int i = historyCount; i < 5; i++)
@@ -773,6 +767,7 @@ namespace DrawingTool
         #endregion cutCopyPasteSelect
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
+            //copy from selection
             if (e.Modifiers == Keys.Control && e.KeyCode == Keys.C)
             {
                 if(!copyButton.Enabled)
@@ -781,7 +776,7 @@ namespace DrawingTool
                     copyButton_Click(sender, e);
                 return;
             }
-
+            //cut from selection
             if (e.Modifiers == Keys.Control && e.KeyCode == Keys.X)
             {
                 if(!cutButton.Enabled)
@@ -790,7 +785,7 @@ namespace DrawingTool
                     cutButton_Click(sender, e);
                 return;
             }
-
+            //paste to selection
             if (e.Modifiers == Keys.Control && e.KeyCode == Keys.V)
             {
                 if(!pasteButton.Enabled)
@@ -833,5 +828,60 @@ namespace DrawingTool
             px10ToolStripMenuItem.Checked = false;
         }
         #endregion lineThickness
+
+        private void pictureBox1_Paint(object sender, PaintEventArgs e)
+        {
+            Pen pen = new Pen(currentColor, thickness);
+            System.Drawing.SolidBrush myBrush = new System.Drawing.SolidBrush(currentColor);
+            if (selectedTool == "square" || selectedTool == "rectangle")
+            {
+                if (finalPaint)
+                {
+                    Graphics g = Graphics.FromImage(pictureBox1.Image);
+                    if (filled)
+                        g.FillRectangle(myBrush, r);
+                    else
+                        g.DrawRectangle(pen, r);
+                    finalPaint = false;
+                    pictureBox1.Invalidate();
+                }
+                else
+                    if (filled)
+                        e.Graphics.FillRectangle(myBrush, r);
+                    else
+                        e.Graphics.DrawRectangle(pen, r);
+            }
+            if (selectedTool == "ellipse" || selectedTool == "circle")
+            {
+                if (finalPaint)
+                {
+                    Graphics g = Graphics.FromImage(pictureBox1.Image);
+                    if (filled)
+                        g.FillEllipse(myBrush, r);
+                    else
+                        g.DrawEllipse(pen, r);
+                    finalPaint = false;
+                    pictureBox1.Invalidate();
+                }
+                else
+                    if (filled)
+                        e.Graphics.FillEllipse(myBrush, r);
+                    else
+                        e.Graphics.DrawEllipse(pen, r);
+            }
+            if (selectedTool == "line")
+            
+                if (finalPaint) {
+                    Graphics g = Graphics.FromImage(pictureBox1.Image);
+                    g.DrawLine(pen, (System.Drawing.PointF)initial, (System.Drawing.PointF)current);
+                    finalPaint = false;
+                    pictureBox1.Invalidate();
+                }
+                else
+                    e.Graphics.DrawLine(pen, (System.Drawing.PointF)initial, (System.Drawing.PointF)current);
+
+        }
+
+        
     }
 }

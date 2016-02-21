@@ -29,7 +29,7 @@ namespace DrawingTool
         {
 
         }
-
+        //open the background image for the new layout
         private void openImageButton_Click(object sender, EventArgs e)
         {
             OpenFileDialog dialog = new OpenFileDialog();
@@ -113,7 +113,9 @@ namespace DrawingTool
                 string locPath = name.Substring(0, name.Length - extension.Length)+"Locations.txt";
        
                 int size = positions.Count;
+                //save the background image
                 pictureBox1.Image.Save(name);
+                //save the locations of collage images
                 if (!File.Exists(locPath))
                 {
                     // Create a file to write to.

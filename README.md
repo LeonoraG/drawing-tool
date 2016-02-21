@@ -13,3 +13,5 @@ Currently implemented features are:
 - cut, copy regions from selection to clipboard
 - paste from clipboard to selection
 - line thickness settings
+
+Icons are from site http://www.flaticon.com/
