@@ -185,9 +185,11 @@
             // 
             // px1ToolStripMenuItem
             // 
+            this.px1ToolStripMenuItem.Checked = true;
             this.px1ToolStripMenuItem.CheckOnClick = true;
+            this.px1ToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.px1ToolStripMenuItem.Name = "px1ToolStripMenuItem";
-            this.px1ToolStripMenuItem.Size = new System.Drawing.Size(101, 22);
+            this.px1ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.px1ToolStripMenuItem.Text = "1 px";
             this.px1ToolStripMenuItem.Click += new System.EventHandler(this.px1ToolStripMenuItem_Click);
             // 
@@ -195,7 +197,7 @@
             // 
             this.px5ToolStripMenuItem.CheckOnClick = true;
             this.px5ToolStripMenuItem.Name = "px5ToolStripMenuItem";
-            this.px5ToolStripMenuItem.Size = new System.Drawing.Size(101, 22);
+            this.px5ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.px5ToolStripMenuItem.Text = "5 px";
             this.px5ToolStripMenuItem.Click += new System.EventHandler(this.px5ToolStripMenuItem_Click);
             // 
@@ -203,7 +205,7 @@
             // 
             this.px10ToolStripMenuItem.CheckOnClick = true;
             this.px10ToolStripMenuItem.Name = "px10ToolStripMenuItem";
-            this.px10ToolStripMenuItem.Size = new System.Drawing.Size(101, 22);
+            this.px10ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.px10ToolStripMenuItem.Text = "10 px";
             this.px10ToolStripMenuItem.Click += new System.EventHandler(this.px10ToolStripMenuItem_Click);
             // 
@@ -211,7 +213,7 @@
             // 
             this.px15ToolStripMenuItem.CheckOnClick = true;
             this.px15ToolStripMenuItem.Name = "px15ToolStripMenuItem";
-            this.px15ToolStripMenuItem.Size = new System.Drawing.Size(101, 22);
+            this.px15ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.px15ToolStripMenuItem.Text = "15 px";
             this.px15ToolStripMenuItem.Click += new System.EventHandler(this.px15ToolStripMenuItem_Click);
             // 
@@ -254,6 +256,7 @@
             // 
             // newEmptyImageButton
             // 
+            this.newEmptyImageButton.BackColor = System.Drawing.SystemColors.Control;
             this.newEmptyImageButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.newEmptyImageButton.Image = ((System.Drawing.Image)(resources.GetObject("newEmptyImageButton.Image")));
             this.newEmptyImageButton.ImageTransparentColor = System.Drawing.Color.Magenta;

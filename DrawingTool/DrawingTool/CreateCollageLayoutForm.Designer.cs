@@ -93,7 +93,7 @@
             this.saveLayoutButton});
             this.toolStrip1.Location = new System.Drawing.Point(3, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(58, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(89, 25);
             this.toolStrip1.TabIndex = 0;
             // 
             // openImageButton
@@ -109,6 +109,7 @@
             // saveLayoutButton
             // 
             this.saveLayoutButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.saveLayoutButton.Enabled = false;
             this.saveLayoutButton.Image = ((System.Drawing.Image)(resources.GetObject("saveLayoutButton.Image")));
             this.saveLayoutButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.saveLayoutButton.Name = "saveLayoutButton";

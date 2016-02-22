@@ -38,6 +38,9 @@ namespace DrawingTool
             {
                 String[] paths = dialog.FileNames;
                 String currentImagePath = "";
+                Boolean imageLoaded = false;
+                Boolean positionsLoaded = false;
+                bool validTxtFile = true;
                 foreach (String path in paths)
                 {
                     if (path.EndsWith(".txt"))
@@ -50,27 +53,47 @@ namespace DrawingTool
                             {
                                 if (numOfImages == 0)
                                 {
+                                    validTxtFile = validTxtFile && Int32.TryParse(s, out numOfImages);
                                     numOfImages = Int32.Parse(s);
                                 }
                                 else
                                 {
                                     char[] delimiterChars = { ' ', ',' };
                                     string[] strCoords = s.Split(delimiterChars);
-                                    int x1 = Int32.Parse(strCoords[0]);
-                                    int y1 = Int32.Parse(strCoords[1]);
-                                    int x2 = Int32.Parse(strCoords[2]);
-                                    int y2 = Int32.Parse(strCoords[3]);
+                                    int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+                                    validTxtFile = validTxtFile && Int32.TryParse(strCoords[0], out x1);
+                                    validTxtFile = validTxtFile && Int32.TryParse(strCoords[1], out y1);
+                                    validTxtFile = validTxtFile && Int32.TryParse(strCoords[2], out x2);
+                                    validTxtFile = validTxtFile && Int32.TryParse(strCoords[3], out y2);
                                     positions.Add(new Tuple<int, int, int, int>(x1,y1,x2,y2));
                                 }
                             }
                         }
+                        positionsLoaded = true;
                     }
                     if (path.EndsWith(".png") || path.EndsWith(".jpg") || path.EndsWith(".gif"))
                     {
                         currentImagePath = path;
                         this.pictureBox1.Image = Image.FromFile(currentImagePath);
                         saveAsButton.Enabled = true;
+                        closeButton.Enabled = true;
+                        imageLoaded = true;
                     }
+                }
+                if (!imageLoaded || !positionsLoaded)
+                {
+                    String errMessage = "";
+                    if (!imageLoaded)
+                        errMessage += "Background image not loaded. Select an image for background.\n";
+                    if (!positionsLoaded || !validTxtFile)
+                        errMessage += "Positions not loaded. Select a valid .txt file with positions.\n";
+                    MessageBox.Show(errMessage, "Form layout loading error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    
+                    this.pictureBox1.Image = null;
+                    this.positions = new List<Tuple<int, int, int, int>>();
+                    saveAsButton.Enabled = false;
+                    closeButton.Enabled = false;
                 }
                 
             }
@@ -160,6 +183,7 @@ namespace DrawingTool
                         Graphics g = Graphics.FromImage(pictureBox1.Image);
                         g.DrawImage(img_, destRect);
                         pictureBox1.Invalidate();
+                        break;
                     }
                 }
             }

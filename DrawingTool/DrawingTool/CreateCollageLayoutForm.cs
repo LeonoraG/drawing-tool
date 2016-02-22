@@ -45,6 +45,7 @@ namespace DrawingTool
                 String currentImagePath = dialog.FileName;
                 imgName = dialog.SafeFileName;
                 this.pictureBox1.Image = Image.FromFile(currentImagePath);
+                this.saveLayoutButton.Enabled = true;
             }
         }
 

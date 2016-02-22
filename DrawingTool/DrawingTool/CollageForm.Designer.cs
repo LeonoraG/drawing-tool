@@ -31,27 +31,27 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CollageForm));
             this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
+            this.panel1 = new System.Windows.Forms.Panel();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.loadLayoutButton = new System.Windows.Forms.ToolStripButton();
             this.createLayoutButton = new System.Windows.Forms.ToolStripButton();
             this.loadImagesButton = new System.Windows.Forms.ToolStripButton();
-            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.saveAsButton = new System.Windows.Forms.ToolStripButton();
-            this.imageList2 = new System.Windows.Forms.ImageList(this.components);
-            this.panel1 = new System.Windows.Forms.Panel();
             this.presetsButton = new System.Windows.Forms.ToolStripDropDownButton();
             this.smilePresetButton = new System.Windows.Forms.ToolStripMenuItem();
             this.notebookPresetButton = new System.Windows.Forms.ToolStripMenuItem();
             this.moviePresetButton = new System.Windows.Forms.ToolStripMenuItem();
             this.heartsPresetButton = new System.Windows.Forms.ToolStripMenuItem();
             this.closeButton = new System.Windows.Forms.ToolStripButton();
+            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
+            this.imageList2 = new System.Windows.Forms.ImageList(this.components);
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer1.SuspendLayout();
+            this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.toolStrip1.SuspendLayout();
-            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStripContainer1
@@ -71,6 +71,16 @@
             // toolStripContainer1.TopToolStripPanel
             // 
             this.toolStripContainer1.TopToolStripPanel.Controls.Add(this.toolStrip1);
+            // 
+            // panel1
+            // 
+            this.panel1.AutoScroll = true;
+            this.panel1.Controls.Add(this.pictureBox1);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel1.Location = new System.Drawing.Point(0, 0);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(369, 237);
+            this.panel1.TabIndex = 1;
             // 
             // pictureBox1
             // 
@@ -121,6 +131,7 @@
             // loadImagesButton
             // 
             this.loadImagesButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.loadImagesButton.Enabled = false;
             this.loadImagesButton.Image = ((System.Drawing.Image)(resources.GetObject("loadImagesButton.Image")));
             this.loadImagesButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.loadImagesButton.Name = "loadImagesButton";
@@ -128,37 +139,16 @@
             this.loadImagesButton.Text = "Load images to layout";
             this.loadImagesButton.Click += new System.EventHandler(this.loadImagesButton_Click);
             // 
-            // imageList1
-            // 
-            this.imageList1.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
-            this.imageList1.ImageSize = new System.Drawing.Size(16, 16);
-            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
-            // 
             // saveAsButton
             // 
             this.saveAsButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.saveAsButton.Enabled = false;
             this.saveAsButton.Image = ((System.Drawing.Image)(resources.GetObject("saveAsButton.Image")));
             this.saveAsButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.saveAsButton.Name = "saveAsButton";
             this.saveAsButton.Size = new System.Drawing.Size(23, 22);
             this.saveAsButton.Text = "Save as...";
             this.saveAsButton.Click += new System.EventHandler(this.saveAsButton_Click);
-            // 
-            // imageList2
-            // 
-            this.imageList2.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
-            this.imageList2.ImageSize = new System.Drawing.Size(16, 16);
-            this.imageList2.TransparentColor = System.Drawing.Color.Transparent;
-            // 
-            // panel1
-            // 
-            this.panel1.AutoScroll = true;
-            this.panel1.Controls.Add(this.pictureBox1);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(0, 0);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(369, 237);
-            this.panel1.TabIndex = 1;
             // 
             // presetsButton
             // 
@@ -177,40 +167,53 @@
             // smilePresetButton
             // 
             this.smilePresetButton.Name = "smilePresetButton";
-            this.smilePresetButton.Size = new System.Drawing.Size(152, 22);
+            this.smilePresetButton.Size = new System.Drawing.Size(129, 22);
             this.smilePresetButton.Text = "Smile";
             this.smilePresetButton.Click += new System.EventHandler(this.smilePresetButton_Click);
             // 
             // notebookPresetButton
             // 
             this.notebookPresetButton.Name = "notebookPresetButton";
-            this.notebookPresetButton.Size = new System.Drawing.Size(152, 22);
+            this.notebookPresetButton.Size = new System.Drawing.Size(129, 22);
             this.notebookPresetButton.Text = "Notebook";
             this.notebookPresetButton.Click += new System.EventHandler(this.notebookPresetButton_Click);
             // 
             // moviePresetButton
             // 
             this.moviePresetButton.Name = "moviePresetButton";
-            this.moviePresetButton.Size = new System.Drawing.Size(152, 22);
+            this.moviePresetButton.Size = new System.Drawing.Size(129, 22);
             this.moviePresetButton.Text = "Movie reel";
             this.moviePresetButton.Click += new System.EventHandler(this.moviePresetButton_Click);
             // 
             // heartsPresetButton
             // 
             this.heartsPresetButton.Name = "heartsPresetButton";
-            this.heartsPresetButton.Size = new System.Drawing.Size(152, 22);
+            this.heartsPresetButton.Size = new System.Drawing.Size(129, 22);
             this.heartsPresetButton.Text = "Hearts";
             this.heartsPresetButton.Click += new System.EventHandler(this.heartsPresetButton_Click);
             // 
             // closeButton
             // 
             this.closeButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.closeButton.Enabled = false;
             this.closeButton.Image = ((System.Drawing.Image)(resources.GetObject("closeButton.Image")));
             this.closeButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.closeButton.Name = "closeButton";
             this.closeButton.Size = new System.Drawing.Size(23, 22);
             this.closeButton.Text = "Close collage";
             this.closeButton.Click += new System.EventHandler(this.closeButton_Click);
+            // 
+            // imageList1
+            // 
+            this.imageList1.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
+            this.imageList1.ImageSize = new System.Drawing.Size(16, 16);
+            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
+            // 
+            // imageList2
+            // 
+            this.imageList2.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
+            this.imageList2.ImageSize = new System.Drawing.Size(16, 16);
+            this.imageList2.TransparentColor = System.Drawing.Color.Transparent;
             // 
             // CollageForm
             // 
@@ -225,11 +228,11 @@
             this.toolStripContainer1.TopToolStripPanel.PerformLayout();
             this.toolStripContainer1.ResumeLayout(false);
             this.toolStripContainer1.PerformLayout();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
             this.ResumeLayout(false);
 
         }
