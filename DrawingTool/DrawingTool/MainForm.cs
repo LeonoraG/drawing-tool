@@ -13,7 +13,7 @@ using System.Media;
 
 namespace DrawingTool
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
         String currentImagePath = "";
 
@@ -46,15 +46,16 @@ namespace DrawingTool
         Bitmap OriginalImage = null;
         Graphics SelectedGraphics = null;
         Rectangle selection;
+        Image beforeSelection; //backup in case we gave up from selection
         
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
             degreesTextBox.Text = "0,0";
         }
 
 
-        private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
+        private void PictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
             initial = e.Location;
             current = initial;
@@ -65,6 +66,12 @@ namespace DrawingTool
             if (selectedTool == "selectionTool")
             {
                 selectingArea = true;
+
+                //backup image
+                Bitmap bmp2 = new Bitmap(pictureBox1.Image);
+                Image img = bmp2;
+                beforeSelection = img;
+
                 SelectedImage = new Bitmap(OriginalImage);
                 SelectedGraphics = Graphics.FromImage(SelectedImage);
                 pictureBox1.Image = SelectedImage;
@@ -72,7 +79,7 @@ namespace DrawingTool
             else if (selectedTool == "pencil")
             {
                 previous = e.Location;
-                pictureBox1_MouseMove(sender, e);
+                PictureBox1_MouseMove(sender, e);
             }
             else if (selectedTool == "line")
             {
@@ -87,7 +94,7 @@ namespace DrawingTool
             }
         }
 
-        private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
+        private void PictureBox1_MouseMove(object sender, MouseEventArgs e)
         {
             current = e.Location;
             Pen myPen = new Pen(currentColor, thickness);
@@ -137,8 +144,10 @@ namespace DrawingTool
                 X1 = e.X;
                 Y1 = e.Y;
 
+
                 SelectedGraphics.DrawImage(OriginalImage, 0, 0);
 
+                //draw red dashed selection rectangle on the image
                 using (Pen select_pen = new Pen(Color.Red))
                 {
                     select_pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
@@ -150,7 +159,7 @@ namespace DrawingTool
             }
         }
 
-        private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
+        private void PictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
             previous = null;
             Pen myPen = new Pen(currentColor, thickness);
@@ -159,7 +168,7 @@ namespace DrawingTool
             {
                 Bitmap bmp2 = new Bitmap(pictureBox1.Image);
                 Image img = bmp2;
-                saveToHistory(img, "New pencil drawing");
+                SaveToHistory(img, "New pencil drawing");
             }
 
             if (drawing && (selectedTool == "square" || selectedTool == "ellipse" || selectedTool == "circle" || selectedTool == "rectangle"))
@@ -170,9 +179,9 @@ namespace DrawingTool
                 Bitmap bmp2 = new Bitmap(pictureBox1.Image);
                 Image img = bmp2;
                 if (filled)
-                    saveToHistory(img, "New filled " + selectedTool);
+                    SaveToHistory(img, "New filled " + selectedTool);
                 else
-                    saveToHistory(img, "New " + selectedTool);
+                    SaveToHistory(img, "New " + selectedTool);
                 
             }
            
@@ -182,7 +191,7 @@ namespace DrawingTool
                 pictureBox1.Invalidate();
                 Bitmap bmp2 = new Bitmap(pictureBox1.Image);
                 Image img = bmp2;
-                saveToHistory(img, "New line");
+                SaveToHistory(img, "New line");
                 drawing = false;
             }
             
@@ -211,7 +220,7 @@ namespace DrawingTool
         }
 
         
-        private void colorPickerButton_Click(object sender, EventArgs e)
+        private void ColorPickerButton_Click(object sender, EventArgs e)
         {
             this.selectButton.BackColor = SystemColors.Control;
             ColorDialog MyDialog = new ColorDialog();
@@ -224,7 +233,7 @@ namespace DrawingTool
         }
 
         #region openSaveImage
-        private void openImageButton_Click(object sender, EventArgs e)
+        private void OpenImageButton_Click(object sender, EventArgs e)
         {
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.InitialDirectory = "c:\\";
@@ -242,7 +251,7 @@ namespace DrawingTool
                 //saving to history
                 Bitmap bmp2 = new Bitmap(pictureBox1.Image);
                 Image img = bmp2;
-                saveToHistory(img, "New image from file: " + dialog.SafeFileName);
+                SaveToHistory(img, "New image from file: " + dialog.SafeFileName);
 
                 //enabling the buttons
                 toolSelectDropdownButton.Enabled = true;
@@ -254,7 +263,7 @@ namespace DrawingTool
                 selectButton.Enabled = true;
             }
         }
-        private void newEmptyImage_Click(object sender, EventArgs e)
+        private void NewEmptyImage_Click(object sender, EventArgs e)
         {
             //creating an empty image
             Bitmap bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
@@ -267,7 +276,7 @@ namespace DrawingTool
             //saving to history
             Bitmap bmp2 = new Bitmap(pictureBox1.Image);
             Image img = bmp2;
-            saveToHistory(img, "New empty image");
+            SaveToHistory(img, "New empty image");
 
             //enabling the buttons
             toolSelectDropdownButton.Enabled = true;
@@ -278,12 +287,12 @@ namespace DrawingTool
             rotateButton.Enabled = true;
             selectButton.Enabled = true;
         }
-        private void saveButton_Click(object sender, EventArgs e)
+        private void SaveButton_Click(object sender, EventArgs e)
         {
             if(currentImagePath!="")
                 pictureBox1.Image.Save(currentImagePath);
         }
-        private void saveAsButton_Click(object sender, EventArgs e)
+        private void SaveAsButton_Click(object sender, EventArgs e)
         {
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
 
@@ -297,7 +306,7 @@ namespace DrawingTool
                 pictureBox1.Image.Save(name);
             }
         }
-        private void closeFileButton_Click(object sender, EventArgs e)
+        private void CloseFileButton_Click(object sender, EventArgs e)
         {
             //reseting the values
             pictureBox1.Image = null;
@@ -321,85 +330,107 @@ namespace DrawingTool
         #endregion openSaveImage
 
         #region tools
-        private void pencilToolStripMenuItem_Click(object sender, EventArgs e)
+        private void PencilToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            RemoveSelectionRectangle();
+
             this.selectButton.BackColor = SystemColors.Control;
             selectedTool = "pencil";
             filled = false;
             this.toolSelectDropdownButton.Image = ((System.Drawing.Image)(resources1.GetObject("pencilToolStripMenuItem.Image")));
         }
 
-        private void lineToolStripMenuItem_Click(object sender, EventArgs e)
+        private void LineToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            RemoveSelectionRectangle();
+
             this.selectButton.BackColor = SystemColors.Control;
             selectedTool = "line";
             filled = false;
             this.toolSelectDropdownButton.Image = ((System.Drawing.Image)(resources1.GetObject("lineToolStripMenuItem.Image")));
         }
 
-        private void circleToolStripMenuItem_Click(object sender, EventArgs e)
+        private void CircleToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            RemoveSelectionRectangle();
+
             this.selectButton.BackColor = SystemColors.Control;
             selectedTool = "circle";
             filled = false;
             this.toolSelectDropdownButton.Image = ((System.Drawing.Image)(resources1.GetObject("circleToolStripMenuItem.Image")));
         }
 
-        private void ellipseToolStripMenuItem_Click(object sender, EventArgs e)
+        private void EllipseToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            RemoveSelectionRectangle();
+
             this.selectButton.BackColor = SystemColors.Control;
             selectedTool = "ellipse";
             filled = false;
             this.toolSelectDropdownButton.Image = ((System.Drawing.Image)(resources1.GetObject("ellipseToolStripMenuItem.Image")));
         }
 
-        private void squareToolStripMenuItem_Click(object sender, EventArgs e)
+        private void SquareToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            RemoveSelectionRectangle();
+
             this.selectButton.BackColor = SystemColors.Control;
             selectedTool = "square";
             filled = false;
             this.toolSelectDropdownButton.Image = ((System.Drawing.Image)(resources1.GetObject("squareToolStripMenuItem.Image")));
         }
-        private void rectangleToolStripMenuItem_Click(object sender, EventArgs e)
+        private void RectangleToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            RemoveSelectionRectangle();
+
             this.selectButton.BackColor = SystemColors.Control;
             selectedTool = "rectangle";
             filled = false;
             this.toolSelectDropdownButton.Image = ((System.Drawing.Image)(resources1.GetObject("rectangleToolStripMenuItem.Image")));
         }
-        private void filledCircleToolStripMenuItem_Click(object sender, EventArgs e)
+        private void FilledCircleToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            RemoveSelectionRectangle();
+
             this.selectButton.BackColor = SystemColors.Control;
             selectedTool = "circle";
             filled = true;
             this.toolSelectDropdownButton.Image = ((System.Drawing.Image)(resources1.GetObject("filledCircleToolStripMenuItem.Image")));
         }
 
-        private void filledEllipseToolStripMenuItem_Click(object sender, EventArgs e)
+        private void FilledEllipseToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            RemoveSelectionRectangle();
+
             this.selectButton.BackColor = SystemColors.Control;
             selectedTool = "ellipse";
             filled = true;
             this.toolSelectDropdownButton.Image = ((System.Drawing.Image)(resources1.GetObject("filledEllipseToolStripMenuItem.Image")));
         }
 
-        private void filledSquareToolStripMenuItem_Click(object sender, EventArgs e)
+        private void FilledSquareToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            RemoveSelectionRectangle();
+
             this.selectButton.BackColor = SystemColors.Control;
             selectedTool = "square";
             filled = true;
             this.toolSelectDropdownButton.Image = ((System.Drawing.Image)(resources1.GetObject("filledSquareToolStripMenuItem.Image")));
         }
-        private void filledRectangleToolStripMenuItem_Click(object sender, EventArgs e)
+        private void FilledRectangleToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            RemoveSelectionRectangle();
+
             this.selectButton.BackColor = SystemColors.Control;
             selectedTool = "rectangle";
             filled = true;
             this.toolSelectDropdownButton.Image = ((System.Drawing.Image)(resources1.GetObject("rectangleToolStripMenuItem.Image")));
         }
         
-        private void collageButton_Click(object sender, EventArgs e)
+        private void CollageButton_Click(object sender, EventArgs e)
         {
+            RemoveSelectionRectangle();
+
             this.selectButton.BackColor = SystemColors.Control;
             CollageForm collageForm = new CollageForm();
             collageForm.Show();
@@ -466,6 +497,8 @@ namespace DrawingTool
 
         private void rotateButton_Click(object sender, EventArgs e)
         {
+            RemoveSelectionRectangle();
+
             this.selectButton.BackColor = SystemColors.Control;
             float angle;
             string txt = this.degreesTextBox.Text;
@@ -479,7 +512,7 @@ namespace DrawingTool
             //saving to history
             Bitmap bmp2 = new Bitmap(pictureBox1.Image);
             Image img = bmp2;
-            saveToHistory(img, "Rotation for angle: " + angle);
+            SaveToHistory(img, "Rotation for angle: " + angle);
         }
 
         #endregion rotate
@@ -528,7 +561,7 @@ namespace DrawingTool
                             new float[]{0, 0, 0, 0, 1}
                         });
             pictureBox1.Image = ApplyColorMatrix(pictureBox1.Image, colorMatrix);
-            saveToHistory(pictureBox1.Image, "Transparency filter");
+            SaveToHistory(pictureBox1.Image, "Transparency filter");
 
         }
 
@@ -545,7 +578,7 @@ namespace DrawingTool
                         });
 
             pictureBox1.Image = ApplyColorMatrix(pictureBox1.Image, colorMatrix);
-            saveToHistory(pictureBox1.Image, "Grayscale filter");
+            SaveToHistory(pictureBox1.Image, "Grayscale filter");
         }
 
         private void sepia_Click(object sender, EventArgs e)
@@ -560,7 +593,7 @@ namespace DrawingTool
                 });
 
             pictureBox1.Image = ApplyColorMatrix(pictureBox1.Image, colorMatrix);
-            saveToHistory(pictureBox1.Image, "Sepia filter");
+            SaveToHistory(pictureBox1.Image, "Sepia filter");
         }
         private void negative_Click(object sender, EventArgs e)
         {
@@ -575,12 +608,12 @@ namespace DrawingTool
                     });
 
             pictureBox1.Image = ApplyColorMatrix(pictureBox1.Image, colorMatrix);
-            saveToHistory(pictureBox1.Image, "Color negative filter");
+            SaveToHistory(pictureBox1.Image, "Color negative filter");
         }
         #endregion filters
 
         #region history
-        private void saveToHistory(Image img, String desc)
+        private void SaveToHistory(Image img, String desc)
         {
             //when we have less than max moves saved
             //we simply add the image and description
@@ -601,9 +634,9 @@ namespace DrawingTool
             }
             //update the descriptions in the 
             //history drop down menu
-            updateTags();
+            UpdateTags();
         }
-        private Image getFromHistory(int index)
+        private Image GetFromHistory(int index)
         {           
             Image returnImg;
             //fetch the image and description
@@ -623,11 +656,11 @@ namespace DrawingTool
             historyCount = historyCountCopy;
             //update the descriptions in the 
             //history drop down menu
-            updateTags();
+            UpdateTags();
             return returnImg;
         }
 
-        private void updateTags()
+        private void UpdateTags()
         {
             
             ToolStripMenuItem[] historyMenuItems = {toolStripMenuItem2,toolStripMenuItem3,toolStripMenuItem4, 
@@ -648,45 +681,45 @@ namespace DrawingTool
             }
         }
    
-        private void toolStripMenuItem6_Click(object sender, EventArgs e)
+        private void ToolStripMenuItem6_Click(object sender, EventArgs e)
         {
             this.selectButton.BackColor = SystemColors.Control;
             int index = historyCount - 5;
-            pictureBox1.Image = getFromHistory(index); 
+            pictureBox1.Image = GetFromHistory(index); 
         }
 
-        private void toolStripMenuItem5_Click(object sender, EventArgs e)
+        private void ToolStripMenuItem5_Click(object sender, EventArgs e)
         {
             this.selectButton.BackColor = SystemColors.Control;
             int index = historyCount - 4;
-            pictureBox1.Image = getFromHistory(index); 
+            pictureBox1.Image = GetFromHistory(index); 
         }
 
-        private void toolStripMenuItem4_Click(object sender, EventArgs e)
+        private void ToolStripMenuItem4_Click(object sender, EventArgs e)
         {
             this.selectButton.BackColor = SystemColors.Control;
             int index = historyCount - 3;
-            pictureBox1.Image = getFromHistory(index); 
+            pictureBox1.Image = GetFromHistory(index); 
         }
 
-        private void toolStripMenuItem3_Click(object sender, EventArgs e)
+        private void ToolStripMenuItem3_Click(object sender, EventArgs e)
         {
             this.selectButton.BackColor = SystemColors.Control;
             int index = historyCount - 2;
-            pictureBox1.Image = getFromHistory(index); 
+            pictureBox1.Image = GetFromHistory(index); 
         }
 
-        private void toolStripMenuItem2_Click(object sender, EventArgs e)
+        private void ToolStripMenuItem2_Click(object sender, EventArgs e)
         {
             this.selectButton.BackColor = SystemColors.Control;
             int index = historyCount - 1;
-            pictureBox1.Image = getFromHistory(index); 
+            pictureBox1.Image = GetFromHistory(index); 
         }
 
         #endregion history
 
         #region cutCopyPasteSelect
-        private void copyButton_Click(object sender, EventArgs e)
+        private void CopyButton_Click(object sender, EventArgs e)
         {
             this.selectButton.BackColor = SystemColors.Control;
             Bitmap bm = new Bitmap(selection.Width, selection.Height);
@@ -713,7 +746,7 @@ namespace DrawingTool
             this.selectButton.BackColor = Color.LightGray;
         }
 
-        private void cutButton_Click(object sender, EventArgs e)
+        private void CutButton_Click(object sender, EventArgs e)
         {
             this.selectButton.BackColor = SystemColors.Control;
             OriginalImage = new Bitmap(pictureBox1.Image);
@@ -749,7 +782,7 @@ namespace DrawingTool
             this.selectButton.BackColor = Color.LightGray;
         }
 
-        private void pasteButton_Click(object sender, EventArgs e)
+        private void PasteButton_Click(object sender, EventArgs e)
         {
             this.selectButton.BackColor = SystemColors.Control;
             // Do nothing if the clipboard doesn't hold an image.
@@ -780,12 +813,11 @@ namespace DrawingTool
             SelectedGraphics = null;
             selectionRectangleSet = false;
         }
-        private void selectButton_Click(object sender, EventArgs e)
+        private void SelectButton_Click(object sender, EventArgs e)
         {
             selectedTool = "selectionTool";
             this.selectButton.BackColor = Color.LightGray;
         }
-        #endregion cutCopyPasteSelect
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             //copy from selection
@@ -794,7 +826,7 @@ namespace DrawingTool
                 if(!copyButton.Enabled)
                     SystemSounds.Beep.Play();
                 else
-                    copyButton_Click(sender, e);
+                    CopyButton_Click(sender, e);
                 return;
             }
             //cut from selection
@@ -803,7 +835,7 @@ namespace DrawingTool
                 if(!cutButton.Enabled)
                     SystemSounds.Beep.Play();
                 else
-                    cutButton_Click(sender, e);
+                    CutButton_Click(sender, e);
                 return;
             }
             //paste to selection
@@ -812,13 +844,21 @@ namespace DrawingTool
                 if(!pasteButton.Enabled)
                     SystemSounds.Beep.Play();
                 else
-                    pasteButton_Click(sender, e);
+                    PasteButton_Click(sender, e);
                 return;
             }
         }
+        //Removes the red dashed selection triangle from the picture
+        private void RemoveSelectionRectangle()
+        {
+            if(cutButton.Enabled || copyButton.Enabled || pasteButton.Enabled)
+                pictureBox1.Image = beforeSelection;
+            
+        }
+        #endregion cutCopyPasteSelect
 
         #region lineThickness
-        private void px1ToolStripMenuItem_Click(object sender, EventArgs e)
+        private void Px1ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.selectButton.BackColor = SystemColors.Control;
             thickness = 1;
@@ -827,7 +867,7 @@ namespace DrawingTool
             px15ToolStripMenuItem.Checked = false;
         }
 
-        private void px5ToolStripMenuItem_Click(object sender, EventArgs e)
+        private void Px5ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.selectButton.BackColor = SystemColors.Control;
             thickness = 5;
@@ -835,7 +875,7 @@ namespace DrawingTool
             px10ToolStripMenuItem.Checked = false;
             px15ToolStripMenuItem.Checked = false;
         }
-        private void px10ToolStripMenuItem_Click(object sender, EventArgs e)
+        private void Px10ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.selectButton.BackColor = SystemColors.Control;
             thickness = 10;
@@ -844,7 +884,7 @@ namespace DrawingTool
             px15ToolStripMenuItem.Checked = false;
         }
 
-        private void px15ToolStripMenuItem_Click(object sender, EventArgs e)
+        private void Px15ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.selectButton.BackColor = SystemColors.Control;
             thickness = 15;
@@ -854,7 +894,7 @@ namespace DrawingTool
         }
         #endregion lineThickness
 
-        private void pictureBox1_Paint(object sender, PaintEventArgs e)
+        private void PictureBox1_Paint(object sender, PaintEventArgs e)
         {
             Pen pen = new Pen(currentColor, thickness);
             System.Drawing.SolidBrush myBrush = new System.Drawing.SolidBrush(currentColor);
